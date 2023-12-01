@@ -20,7 +20,7 @@ fn parse_line(i: &str) -> u32 {
 }
 
 fn parse_line_2(input: &str) -> u32 {
-    let numbers = vec![
+    let numbers = [
         "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "1", "2", "3", "4",
         "5", "6", "7", "8", "9",
     ];
@@ -32,18 +32,14 @@ fn parse_line_2(input: &str) -> u32 {
     let mut s_d = u32::MIN;
 
     for n in numbers {
-        if let Some(idx) = input.find(n) {
-            if idx < f_i {
-                f_i = idx;
-                f_d = aoc23::parse_digit(&n);
-            }
+        if let Some(idx) = input.find(n).filter(|idx| idx < &f_i) {
+            f_i = idx;
+            f_d = aoc23::parse_digit(&n);
         }
 
-        if let Some(idx) = input.rfind(n) {
-            if idx >= s_i {
-                s_i = idx;
-                s_d = aoc23::parse_digit(&n);
-            }
+        if let Some(idx) = input.rfind(n).filter(|idx| idx >= &s_i) {
+            s_i = idx;
+            s_d = aoc23::parse_digit(&n);
         }
     }
 
