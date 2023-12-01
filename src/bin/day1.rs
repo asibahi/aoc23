@@ -21,48 +21,33 @@ fn parse_line(i: &str) -> u32 {
 
 fn parse_line_2(input: &str) -> u32 {
     let numbers = vec![
-        "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "0", "1", "2", "3",
-        "4", "5", "6", "7", "8", "9",
+        "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "1", "2", "3", "4",
+        "5", "6", "7", "8", "9",
     ];
 
-    let fst_digit = {
-        let mut i = usize::MAX;
-        let mut d = u32::MAX;
-        for n in &numbers {
-            if let Some(idx) = input.find(n) {
-                if idx < i {
-                    i = idx;
-                    d = aoc23::parse_digit(&n);
-                }
+    let mut f_i = usize::MAX;
+    let mut f_d = u32::MAX;
+
+    let mut s_i = usize::MIN;
+    let mut s_d = u32::MIN;
+
+    for n in numbers {
+        if let Some(idx) = input.find(n) {
+            if idx < f_i {
+                f_i = idx;
+                f_d = aoc23::parse_digit(&n);
             }
         }
-        d
-    };
 
-    let rev_ns = numbers
-        .into_iter()
-        .map(|w| w.chars().rev().collect::<String>());
-
-    let rev_input = input.chars().rev().collect::<String>();
-
-    let snd_digit = {
-        let mut i = usize::MAX;
-
-        let mut d = u32::MAX;
-
-        for n in rev_ns {
-            if let Some(idx) = rev_input.find(&n) {
-                let n = n.chars().rev().collect::<String>();
-                if idx < i {
-                    i = idx;
-                    d = aoc23::parse_digit(&n);
-                }
+        if let Some(idx) = input.rfind(n) {
+            if idx >= s_i {
+                s_i = idx;
+                s_d = aoc23::parse_digit(&n);
             }
         }
-        d
-    };
+    }
 
-    fst_digit * 10 + snd_digit
+    f_d * 10 + s_d
 }
 
 fn solve_1(i: &str) -> u32 {
