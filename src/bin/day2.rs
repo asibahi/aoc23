@@ -21,9 +21,8 @@ mod tests {
     use super::*;
     use test_case::test_case;
 
-    #[test_case("two1nine", 29)]
-    fn test(i: &str, r: u32) {
-        let actual = solve_1(i);
-        assert_eq!(actual, r)
+    #[test_case("two1nine" => 29)]
+    fn test(i: &str) -> u32 {
+        solve_1(i)
     }
 }

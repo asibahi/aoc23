@@ -59,15 +59,14 @@ mod tests {
     use super::*;
     use test_case::test_case;
 
-    #[test_case("two1nine", 29)]
-    #[test_case("eightwothree", 83)]
-    #[test_case("abcone2threexyz", 13)]
-    #[test_case("xtwone3four", 24)]
-    #[test_case("sevenine", 79)]
-    #[test_case("one", 11)]
+    #[test_case("two1nine" => 29)]
+    #[test_case("eightwothree" => 83)]
+    #[test_case("abcone2threexyz" => 13)]
+    #[test_case("xtwone3four" => 24)]
+    #[test_case("sevenine" => 79)]
+    #[test_case("one"=> 11)]
 
-    fn test(i: &str, r: u32) {
-        let actual = parse_line_2(i);
-        assert_eq!(actual, r)
+    fn test(i: &str) -> u32 {
+        parse_line_2(i)
     }
 }
