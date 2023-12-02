@@ -218,6 +218,9 @@ mod tests {
     fn bench() {
         use microbench::{self, Options};
 
+        // use this terminal command
+        // cargo test --package aoc23 --bin day2 --release  -- tests::bench --exact --nocapture
+
         let options = Options::default();
         microbench::bench(&options, "original part 1", || solve_1(INPUT));
         microbench::bench(&options, "try 2    part 1", || solve_1_try2(INPUT));
