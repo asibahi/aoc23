@@ -1,10 +1,10 @@
-fn main() {
-    let input = include_str!("../input/day3.txt");
+const INPUT: &str = include_str!("../input/day3.txt");
 
-    let res = solve_1(input);
+fn main() {
+    let res = solve_1(INPUT);
     println!("Part 1:\t{res}");
 
-    let res = solve_2(input);
+    let res = solve_2(INPUT);
     println!("Part 2:\t{res}");
 }
 
@@ -37,5 +37,15 @@ mod tests {
     #[test_case("Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green" => 48)]
     fn test_part_2(i: &str) -> usize {
         parse_line_2(i)
+    }
+
+    #[test]
+    fn bench() {
+        use microbench::{self, Options};
+
+        let input = include_str!("../input/day2.txt");
+        let options = Options::default();
+        microbench::bench(&options, "part_1", || solve_1(input));
+        microbench::bench(&options, "part_2", || solve_2(input));
     }
 }
