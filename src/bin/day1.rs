@@ -11,7 +11,6 @@ fn main() {
 fn parse_line(i: &str) -> u32 {
     let vals = i
         .chars()
-        .into_iter()
         .filter(|c| c.is_numeric())
         .map(|c| c.to_digit(10).unwrap())
         .collect::<Vec<_>>();
@@ -34,12 +33,12 @@ fn parse_line_2(input: &str) -> u32 {
     for n in numbers {
         if let Some(idx) = input.find(n).filter(|idx| idx < &f_i) {
             f_i = idx;
-            f_d = aoc23::parse_digit(&n);
+            f_d = aoc23::parse_digit(n);
         }
 
         if let Some(idx) = input.rfind(n).filter(|idx| idx >= &s_i) {
             s_i = idx;
-            s_d = aoc23::parse_digit(&n);
+            s_d = aoc23::parse_digit(n);
         }
     }
 
