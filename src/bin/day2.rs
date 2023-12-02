@@ -113,7 +113,7 @@ fn solve_2_try2(input: &str) -> usize {
 fn parse_line_2_try2(input: &str) -> usize {
     input
         .split_once(':')
-        .map(|(_, hands)| {
+        .and_then(|(_, hands)| {
             hands
                 .split([';', ','])
                 .map(|c| {
@@ -126,7 +126,30 @@ fn parse_line_2_try2(input: &str) -> usize {
                 })
                 .reduce(|x, y| (x.0.max(y.0), x.1.max(y.1), x.2.max(y.2)))
                 .map(|(x, y, z)| x * y * z)
-                .unwrap_or_default()
+        })
+        .unwrap_or_default()
+}
+
+#[allow(unused)]
+fn solve_2_try3(input: &str) -> usize {
+    input.lines().map(parse_line_2_try3).sum()
+}
+
+fn parse_line_2_try3(input: &str) -> usize {
+    input
+        .split_once(':')
+        .map(|(_, hands)| {
+            hands
+                .split([';', ','])
+                .fold([0; 3], |mut acc, x| {
+                    let (count, color) = x.trim().split_once(' ').unwrap();
+                    let count = count.parse::<usize>().unwrap();
+                    let i = &mut acc[color.as_bytes()[0] as usize % 3];
+                    *i = (*i).max(count);
+                    acc
+                })
+                .iter()
+                .product()
         })
         .unwrap_or_default()
 }
@@ -163,5 +186,6 @@ mod tests {
         microbench::bench(&options, "try 2    part 1", || solve_1_try2(INPUT));
         microbench::bench(&options, "original part 2", || solve_2(INPUT));
         microbench::bench(&options, "try 2    part 2", || solve_2_try2(INPUT));
+        microbench::bench(&options, "try 3    part 2", || solve_2_try3(INPUT));
     }
 }
