@@ -1,10 +1,14 @@
-fn main() {
-    let input = include_str!("../input/day1.txt");
+const INPUT: &str = include_str!("../input/day1.txt");
+const NUMBERS: [&str; 18] = [
+    "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "1", "2", "3", "4",
+    "5", "6", "7", "8", "9",
+];
 
-    let res = solve_1(input);
+fn main() {
+    let res = solve_1(INPUT);
     println!("Part 1:\t{res}");
 
-    let res = solve_2(input);
+    let res = solve_2(INPUT);
     println!("Part 2:\t{res}");
 }
 
@@ -19,23 +23,18 @@ fn parse_line(i: &str) -> u32 {
 }
 
 fn parse_line_2(input: &str) -> u32 {
-    let numbers = [
-        "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "1", "2", "3", "4",
-        "5", "6", "7", "8", "9",
-    ];
-
     let mut f_i = usize::MAX;
     let mut f_d = u32::MAX;
 
     let mut s_i = usize::MIN;
     let mut s_d = u32::MIN;
 
-    for n in numbers {
+    for n in NUMBERS {
         if let Some(idx) = input.find(n).filter(|idx| idx < &f_i) {
             f_i = idx;
             f_d = aoc23::parse_digit(n);
         }
-
+        
         if let Some(idx) = input.rfind(n).filter(|idx| idx >= &s_i) {
             s_i = idx;
             s_d = aoc23::parse_digit(n);
@@ -67,5 +66,14 @@ mod tests {
 
     fn test(i: &str) -> u32 {
         parse_line_2(i)
+    }
+
+    #[test]
+    fn bench() {
+        use microbench::{self, Options};
+
+        let options = Options::default();
+        microbench::bench(&options, "part_1", || solve_1(INPUT));
+        microbench::bench(&options, "part_2", || solve_2(INPUT));
     }
 }
