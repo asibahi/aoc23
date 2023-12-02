@@ -34,7 +34,7 @@ fn parse_line_2(input: &str) -> u32 {
             f_i = idx;
             f_d = aoc23::parse_digit(n);
         }
-        
+
         if let Some(idx) = input.rfind(n).filter(|idx| idx >= &s_i) {
             s_i = idx;
             s_d = aoc23::parse_digit(n);

@@ -5,7 +5,6 @@ const BLUE: usize = 14;
 const INPUT: &str = include_str!("../input/day2.txt");
 
 fn main() {
-
     let res = solve_1(INPUT);
     println!("Part 1:\t{res}");
 
