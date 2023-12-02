@@ -21,12 +21,12 @@ fn parse_line(i: &str) -> u32 {
     fst * 10 + snd
 }
 
-fn parse_line_2(input: &str) -> u32 {
+fn parse_line_2(input: &str) -> usize {
     let mut f_i = usize::MAX;
-    let mut f_d = u32::MAX;
+    let mut f_d = usize::MAX;
 
     let mut s_i = usize::MIN;
-    let mut s_d = u32::MIN;
+    let mut s_d = usize::MIN;
 
     for n in NUMBERS {
         if let Some(idx) = input.find(n).filter(|idx| idx < &f_i) {
@@ -43,12 +43,42 @@ fn parse_line_2(input: &str) -> u32 {
     f_d * 10 + s_d
 }
 
+fn _parse_line_2_performant(input: &str) -> usize {
+    // from https://github.com/proegssilb/advent-of-code/blob/main/2023/src/day1.rs#L168
+    // looked at on Dec2 2023
+
+    let tens = 'tens: {
+        for i in 0..input.len() {
+            let text = &input[i..];
+            if let Some(i) = aoc23::parse_starts_with_digit(text) {
+                break 'tens i;
+            }
+        }
+        0
+    };
+    let ones = 'ones: {
+        for i in (0..input.len()).rev() {
+            let text = &input[i..];
+            if let Some(i) = aoc23::parse_starts_with_digit(text) {
+                break 'ones i;
+            }
+        }
+        0
+    };
+
+    tens * 10 + ones
+}
+
 fn solve_1(i: &str) -> u32 {
     i.lines().map(parse_line).sum()
 }
 
-fn solve_2(i: &str) -> u32 {
+fn solve_2(i: &str) -> usize {
     i.lines().map(parse_line_2).sum()
+}
+
+fn _solve_2_performant(i: &str) -> usize {
+    i.lines().map(_parse_line_2_performant).sum()
 }
 
 #[cfg(test)]
@@ -63,7 +93,7 @@ mod tests {
     #[test_case("sevenine" => 79)]
     #[test_case("one"=> 11)]
 
-    fn test(i: &str) -> u32 {
+    fn test(i: &str) -> usize {
         parse_line_2(i)
     }
 
@@ -74,5 +104,6 @@ mod tests {
         let options = Options::default();
         microbench::bench(&options, "part_1", || solve_1(INPUT));
         microbench::bench(&options, "part_2", || solve_2(INPUT));
+        // microbench::bench(&options, "part_2 chemicalivory", || _solve_2_stolen(INPUT));
     }
 }
