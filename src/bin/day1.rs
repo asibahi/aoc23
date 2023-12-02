@@ -13,13 +13,12 @@ fn main() {
 }
 
 fn parse_line(i: &str) -> u32 {
-    let vals = i
-        .chars()
-        .filter(|c| c.is_numeric())
-        .map(|c| c.to_digit(10).unwrap())
-        .collect::<Vec<_>>();
+    let mut vals = i.chars().filter_map(|c| c.to_digit(10));
 
-    vals[0] * 10 + vals.last().unwrap()
+    let fst = vals.next().unwrap();
+    let snd = vals.next_back().unwrap_or(fst);
+
+    fst * 10 + snd
 }
 
 fn parse_line_2(input: &str) -> u32 {
