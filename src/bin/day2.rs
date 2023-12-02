@@ -75,6 +75,43 @@ fn parse_line_1_try2(input: &str) -> bool {
         .unwrap_or_default()
 }
 
+#[allow(unused)]
+fn solve_1_try3(input: &str) -> usize {
+    let mut buffer = String::new();
+    input
+        .lines()
+        .enumerate()
+        .filter_map(|(x, y)| parse_line_1_try3(y, &mut buffer).then_some(x))
+        .sum()
+}
+
+fn parse_line_1_try3(input: &str, buffer: &mut String) -> bool {
+    const SEPS: [char; 3] = [':', ';', ','];
+
+    for ch in input.chars() {
+        if !SEPS.contains(&ch) {
+            buffer.push(ch);
+        } else if ch == ':' {
+            buffer.clear();
+        } else {
+            let (count, color) = buffer.trim().split_once(' ').unwrap();
+            let cond = count.len() > 2
+                || (count.len() == 2 && !count.starts_with('1'))
+                || match color {
+                    "red" => count.parse::<usize>().unwrap() > RED,
+                    "green" => count.parse::<usize>().unwrap() > GREEN,
+                    _ => count.parse::<usize>().unwrap() > BLUE,
+                };
+            if cond {
+                return true;
+            }
+            buffer.clear();
+        }
+    }
+
+    false
+}
+
 fn solve_2(input: &str) -> usize {
     input.lines().map(parse_line_2).sum()
 }
@@ -184,6 +221,7 @@ mod tests {
         let options = Options::default();
         microbench::bench(&options, "original part 1", || solve_1(INPUT));
         microbench::bench(&options, "try 2    part 1", || solve_1_try2(INPUT));
+        microbench::bench(&options, "try 3    part 1", || solve_1_try3(INPUT));
         microbench::bench(&options, "original part 2", || solve_2(INPUT));
         microbench::bench(&options, "try 2    part 2", || solve_2_try2(INPUT));
         microbench::bench(&options, "try 3    part 2", || solve_2_try3(INPUT));
