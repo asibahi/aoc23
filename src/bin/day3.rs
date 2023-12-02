@@ -1,4 +1,4 @@
-const INPUT: &str = include_str!("../input/day3.txt");
+const INPUT: &str = include_str!("../../input/day3.txt");
 
 fn main() {
     let res = solve_1(INPUT);
@@ -43,9 +43,8 @@ mod tests {
     fn bench() {
         use microbench::{self, Options};
 
-        let input = include_str!("../input/day2.txt");
         let options = Options::default();
-        microbench::bench(&options, "part_1", || solve_1(input));
-        microbench::bench(&options, "part_2", || solve_2(input));
+        microbench::bench(&options, "part_1", || solve_1(INPUT));
+        microbench::bench(&options, "part_2", || solve_2(INPUT));
     }
 }

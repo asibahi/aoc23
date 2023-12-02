@@ -2,7 +2,7 @@ const RED: usize = 12;
 const GREEN: usize = 13;
 const BLUE: usize = 14;
 
-const INPUT: &str = include_str!("../input/day2.txt");
+const INPUT: &str = include_str!("../../input/day2.txt");
 
 fn main() {
     let res = solve_1(INPUT);
@@ -10,6 +10,10 @@ fn main() {
 
     let res = solve_2(INPUT);
     println!("Part 2:\t{res}");
+}
+
+fn solve_1(input: &str) -> usize {
+    input.lines().map(parse_line_1).sum()
 }
 
 fn parse_line_1(input: &str) -> usize {
@@ -43,6 +47,38 @@ fn parse_line_1(input: &str) -> usize {
         .unwrap_or_default()
 }
 
+#[allow(unused)]
+fn solve_1_try2(input: &str) -> usize {
+    input
+        .lines()
+        .enumerate()
+        .filter_map(|(x, y)| parse_line_1_try2(y).then_some(x))
+        .sum()
+}
+
+fn parse_line_1_try2(input: &str) -> bool {
+    input
+        .split_once(':')
+        .map(|(_, hands)| {
+            hands
+                .split([';', ','])
+                .map(|c| {
+                    let (count, color) = c.trim().split_once(' ').unwrap();
+                    match color {
+                        "red" => count.parse::<usize>().unwrap() > RED,
+                        "green" => count.parse::<usize>().unwrap() > GREEN,
+                        _ => count.parse::<usize>().unwrap() > BLUE,
+                    }
+                })
+                .all(|x| !x)
+        })
+        .unwrap_or_default()
+}
+
+fn solve_2(input: &str) -> usize {
+    input.lines().map(parse_line_2).sum()
+}
+
 fn parse_line_2(input: &str) -> usize {
     input
         .split_once(':')
@@ -69,12 +105,30 @@ fn parse_line_2(input: &str) -> usize {
         .unwrap_or_default()
 }
 
-fn solve_1(input: &str) -> usize {
-    input.lines().map(parse_line_1).sum()
+#[allow(unused)]
+fn solve_2_try2(input: &str) -> usize {
+    input.lines().map(parse_line_2_try2).sum()
 }
 
-fn solve_2(input: &str) -> usize {
-    input.lines().map(parse_line_2).sum()
+fn parse_line_2_try2(input: &str) -> usize {
+    input
+        .split_once(':')
+        .map(|(_, hands)| {
+            hands
+                .split([';', ','])
+                .map(|c| {
+                    let (count, color) = c.trim().split_once(' ').unwrap();
+                    match color {
+                        "red" => (count.parse::<usize>().unwrap(), 0, 0),
+                        "green" => (0, count.parse::<usize>().unwrap(), 0),
+                        _ => (0, 0, count.parse::<usize>().unwrap()),
+                    }
+                })
+                .reduce(|x, y| (x.0.max(y.0), x.1.max(y.1), x.2.max(y.2)))
+                .map(|(x, y, z)| x * y * z)
+                .unwrap_or_default()
+        })
+        .unwrap_or_default()
 }
 
 #[cfg(test)]
@@ -105,7 +159,9 @@ mod tests {
         use microbench::{self, Options};
 
         let options = Options::default();
-        microbench::bench(&options, "part_1", || solve_1(INPUT));
-        microbench::bench(&options, "part_2", || solve_2(INPUT));
+        microbench::bench(&options, "original part 1", || solve_1(INPUT));
+        microbench::bench(&options, "try 2    part 1", || solve_1_try2(INPUT));
+        microbench::bench(&options, "original part 2", || solve_2(INPUT));
+        microbench::bench(&options, "try 2    part 2", || solve_2_try2(INPUT));
     }
 }
