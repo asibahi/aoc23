@@ -247,6 +247,7 @@ fn solve_2(input: &str) -> usize {
         .sum()
 }
 
+type GearMap = HashMap<(usize, usize), (Option<usize>, Option<usize>)>;
 type ParseLine2Return = (HashMap<NumberLocation, usize>, GearMap);
 
 fn parse_line_2(line_number: usize, input: &str) -> ParseLine2Return {
@@ -318,8 +319,6 @@ fn solve_2_try2(input: &str) -> usize {
         .filter_map(|(fst, snd)| fst.and_then(|fst| snd.map(|snd| snd * fst)))
         .sum()
 }
-
-type GearMap = HashMap<(usize, usize), (Option<usize>, Option<usize>)>;
 
 fn parse_line_2_try2(
     buffer: &mut String,
