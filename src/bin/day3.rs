@@ -1,10 +1,11 @@
+use itertools::Itertools;
 use std::collections::{HashMap, HashSet};
 
 const INPUT: &str = include_str!("../../input/day3.txt");
 
 fn main() {
     let res = solve_1(INPUT);
-    println!("Part 1:\t{res}");
+    println!("Part 1 Try 1:\t{res}");
 
     let res = solve_2(INPUT);
     println!("Part 2:\t{res}");
@@ -156,6 +157,60 @@ fn parse_line_1_try2(
             num,
         );
     }
+}
+
+#[allow(dead_code)]
+fn solve_1_try3(input: &str) -> usize {
+    let width = input.find('\n').unwrap() + 1;
+    let chars = input.chars().collect::<Vec<_>>();
+
+    let mut running_sum = 0;
+
+    for (line_number, line) in input.lines().enumerate() {
+        let mut digit_line = 0;
+
+        for (i, c) in line.char_indices() {
+            if c.is_ascii_digit() {
+                digit_line += 1;
+            } else {
+                // either a '.' or a symbol.
+                if digit_line > 0
+                    && (/* cols */(i - digit_line).saturating_sub(1)..=i.min(width - 1))
+                        .cartesian_product(
+                            /* rows */ line_number.saturating_sub(1)..=line_number + 1,
+                        )
+                        .filter(|(col, row)| {
+                            !(*row == line_number && *col >= (i - digit_line) && *col <= (i - 1))
+                        })
+                        .map(|(row, col)| width * row + col)
+                        .any(|idx| chars[idx] != '.' || !chars[idx].is_ascii_digit())
+                {
+                    running_sum += &line[i - digit_line..i].parse::<usize>().unwrap();
+                }
+                digit_line = 0;
+            }
+        }
+
+        if digit_line > 0
+            && (/* cols */(line.len() - digit_line).saturating_sub(1)..=line.len().min(width - 1))
+                .cartesian_product(
+                    /* rows */ line_number.saturating_sub(1)..=line_number + 1,
+                )
+                .filter(|(col, row)| {
+                    !(*row == line_number
+                        && *col >= (line.len() - digit_line)
+                        && *col <= (line.len() - 1))
+                })
+                .map(|(row, col)| width * row + col)
+                .any(|idx| chars[idx] != ',' || !chars[idx].is_ascii_digit())
+        {
+            running_sum += &line[line.len() - digit_line..line.len()]
+                .parse::<usize>()
+                .unwrap();
+        }
+    }
+
+    running_sum
 }
 
 fn solve_2(input: &str) -> usize {
@@ -350,9 +405,14 @@ mod tests {
         use microbench::{self, Options};
 
         let options = Options::default();
+
+        // Part 1
         microbench::bench(&options, "part_1", || solve_1(INPUT));
         microbench::bench(&options, "part_1 try 2", || solve_1_try2(INPUT));
-        microbench::bench(&options, "part_2", || solve_2(INPUT));
-        microbench::bench(&options, "part_2 try 2", || solve_2_try2(INPUT));
+        microbench::bench(&options, "part_1 try 3", || solve_1_try3(INPUT));
+
+        // Part 2
+        // microbench::bench(&options, "part_2", || solve_2(INPUT));
+        // microbench::bench(&options, "part_2 try 2", || solve_2_try2(INPUT));
     }
 }
