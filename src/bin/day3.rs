@@ -76,7 +76,7 @@ fn parse_line_1(
             buffer.push(c)
         } else {
             // either a '.' or a symbol.
-            if buffer.len() > 0 {
+            if !buffer.is_empty() {
                 // if we have digits in the buffer
                 let num = buffer.parse::<usize>().unwrap();
                 num_map.insert(
@@ -91,7 +91,7 @@ fn parse_line_1(
             }
         }
     }
-    if buffer.len() > 0 {
+    if !buffer.is_empty() {
         // if we have digits in the buffer
         let num = buffer.parse::<usize>().unwrap();
         num_map.insert(
@@ -134,7 +134,7 @@ fn parse_line_1_try2(
             buffer.push(c)
         } else {
             // either a '.' or a symbol.
-            if buffer.len() > 0 {
+            if !buffer.is_empty() {
                 // if we have digits in the buffer
                 let num = buffer.parse::<usize>().unwrap();
                 num_map.insert(
@@ -149,7 +149,7 @@ fn parse_line_1_try2(
             }
         }
     }
-    if buffer.len() > 0 {
+    if !buffer.is_empty() {
         // if we have digits in the buffer
         let num = buffer.parse::<usize>().unwrap();
         num_map.insert(
@@ -230,12 +230,12 @@ fn solve_2(input: &str) -> usize {
         let potentials = loc.expand();
 
         for pot in potentials {
-            if let Some(foo) = gear_mp.get_mut(&pot) {
-                match *foo {
-                    (None, None) => *foo = (Some(n), None),
-                    (None, s) => *foo = (Some(n), s),
-                    (s, None) => *foo = (s, Some(n)),
-                    s => *foo = s,
+            if let Some(nums) = gear_mp.get_mut(&pot) {
+                match *nums {
+                    (None, None) => *nums = (Some(n), None),
+                    (None, s) => *nums = (Some(n), s),
+                    (s, None) => *nums = (s, Some(n)),
+                    s => *nums = s,
                 }
             }
         }
@@ -247,13 +247,9 @@ fn solve_2(input: &str) -> usize {
         .sum()
 }
 
-fn parse_line_2(
-    line_number: usize,
-    input: &str,
-) -> (
-    HashMap<NumberLocation, usize>,
-    HashMap<(usize, usize), (Option<usize>, Option<usize>)>,
-) {
+type ParseLine2Return = (HashMap<NumberLocation, usize>, GearMap);
+
+fn parse_line_2(line_number: usize, input: &str) -> ParseLine2Return {
     // where to store the buffers
     let mut buffer = String::new();
     // keys are the location of the digit , values are the digits and symbols
@@ -265,7 +261,7 @@ fn parse_line_2(
             buffer.push(c)
         } else {
             // either a '.' or a symbol.
-            if buffer.len() > 0 {
+            if !buffer.is_empty() {
                 // if we have digits in the buffer
                 let num = buffer.parse::<usize>().unwrap();
                 num_map.insert(
@@ -280,7 +276,7 @@ fn parse_line_2(
             }
         }
     }
-    if buffer.len() > 0 {
+    if !buffer.is_empty() {
         // if we have digits in the buffer
         let num = buffer.parse::<usize>().unwrap();
         num_map.insert(
@@ -306,12 +302,12 @@ fn solve_2_try2(input: &str) -> usize {
         let potentials = loc.expand();
 
         for pot in potentials {
-            if let Some(foo) = gear_mp.get_mut(&pot) {
-                match *foo {
-                    (None, None) => *foo = (Some(n), None),
-                    (None, s) => *foo = (Some(n), s),
-                    (s, None) => *foo = (s, Some(n)),
-                    s => *foo = s,
+            if let Some(nums) = gear_mp.get_mut(&pot) {
+                match *nums {
+                    (None, None) => *nums = (Some(n), None),
+                    (None, s) => *nums = (Some(n), s),
+                    (s, None) => *nums = (s, Some(n)),
+                    s => *nums = s,
                 }
             }
         }
@@ -323,10 +319,12 @@ fn solve_2_try2(input: &str) -> usize {
         .sum()
 }
 
+type GearMap = HashMap<(usize, usize), (Option<usize>, Option<usize>)>;
+
 fn parse_line_2_try2(
     buffer: &mut String,
     num_map: &mut HashMap<NumberLocation, usize>,
-    gear_mp: &mut HashMap<(usize, usize), (Option<usize>, Option<usize>)>,
+    gear_mp: &mut GearMap,
     line_number: usize,
     input: &str,
 ) {
@@ -335,7 +333,7 @@ fn parse_line_2_try2(
             buffer.push(c)
         } else {
             // either a '.' or a symbol.
-            if buffer.len() > 0 {
+            if !buffer.is_empty() {
                 // if we have digits in the buffer
                 let num = buffer.parse::<usize>().unwrap();
                 num_map.insert(
@@ -350,7 +348,7 @@ fn parse_line_2_try2(
             }
         }
     }
-    if buffer.len() > 0 {
+    if !buffer.is_empty() {
         // if we have digits in the buffer
         let num = buffer.parse::<usize>().unwrap();
         num_map.insert(
