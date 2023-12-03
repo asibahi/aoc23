@@ -1,3 +1,5 @@
+use std::collections::{HashMap, HashSet};
+
 const INPUT: &str = include_str!("../../input/day3.txt");
 
 fn main() {
@@ -8,20 +10,299 @@ fn main() {
     println!("Part 2:\t{res}");
 }
 
-fn parse_line_1(input: &str) -> usize {
-    input.len()
+#[derive(PartialEq, Eq, Hash)]
+struct NumberLocation {
+    line: usize,
+    leftmost_col: usize,
+    rightmost_col: usize,
 }
 
-fn parse_line_2(input: &str) -> usize {
-    input.len()
+impl NumberLocation {
+    fn new(line: usize, leftmost_col: usize, rightmost_col: usize) -> Self {
+        Self {
+            line,
+            leftmost_col,
+            rightmost_col,
+        }
+    }
+
+    fn expand(&self) -> Vec<(usize, usize)> {
+        let mut res = Vec::new();
+
+        for col in self.leftmost_col.saturating_sub(1)..=self.rightmost_col + 1 {
+            for row in self.line.saturating_sub(1)..=self.line + 1 {
+                if !(row == self.line && col >= self.leftmost_col && col <= self.rightmost_col) {
+                    res.push((row, col))
+                }
+            }
+        }
+        res
+    }
 }
 
 fn solve_1(input: &str) -> usize {
-    input.lines().map(parse_line_1).sum()
+    let mut num_map = HashMap::new();
+    let mut sym_map = HashSet::new();
+
+    input
+        .lines()
+        .enumerate()
+        .map(|(line_number, line)| parse_line_1(line_number, line))
+        .for_each(|(x, y)| {
+            num_map.extend(x);
+            sym_map.extend(y);
+        });
+
+    num_map
+        .into_iter()
+        .filter(|(k, _)| k.expand().iter().any(|k| sym_map.contains(k)))
+        .map(|(_, v)| v)
+        .sum()
+}
+
+fn parse_line_1(
+    line_number: usize,
+    input: &str,
+) -> (HashMap<NumberLocation, usize>, HashSet<(usize, usize)>) {
+    // where to store the buffers
+    let mut buffer = String::new();
+    // keys are the location of the digit , values are the digits and symbols
+    let mut num_map = HashMap::new();
+    let mut sym_map = HashSet::new();
+
+    for (i, c) in input.char_indices() {
+        if c.is_ascii_digit() {
+            buffer.push(c)
+        } else {
+            // either a '.' or a symbol.
+            if buffer.len() > 0 {
+                // if we have digits in the buffer
+                let num = buffer.parse::<usize>().unwrap();
+                num_map.insert(
+                    NumberLocation::new(line_number, i - buffer.len(), i - 1),
+                    num,
+                );
+            }
+            buffer.clear();
+            if c != '.' {
+                // if it is a symbol
+                sym_map.insert((line_number, i));
+            }
+        }
+    }
+    if buffer.len() > 0 {
+        // if we have digits in the buffer
+        let num = buffer.parse::<usize>().unwrap();
+        num_map.insert(
+            NumberLocation::new(line_number, input.len() - buffer.len(), input.len() - 1),
+            num,
+        );
+    }
+
+    (num_map, sym_map)
+}
+
+#[allow(dead_code)]
+fn solve_1_try2(input: &str) -> usize {
+    let mut num_map = HashMap::new();
+    let mut sym_map = HashSet::new();
+    let mut buffer = String::new();
+
+    input.lines().enumerate().for_each(|(line_number, line)| {
+        parse_line_1_try2(&mut buffer, &mut num_map, &mut sym_map, line_number, line)
+    });
+
+    num_map
+        .into_iter()
+        .filter(|(k, _)| k.expand().iter().any(|k| sym_map.contains(k)))
+        .map(|(_, v)| v)
+        .sum()
+}
+
+fn parse_line_1_try2(
+    buffer: &mut String,
+    num_map: &mut HashMap<NumberLocation, usize>,
+    sym_map: &mut HashSet<(usize, usize)>,
+    line_number: usize,
+    input: &str,
+) {
+    buffer.clear();
+
+    for (i, c) in input.char_indices() {
+        if c.is_ascii_digit() {
+            buffer.push(c)
+        } else {
+            // either a '.' or a symbol.
+            if buffer.len() > 0 {
+                // if we have digits in the buffer
+                let num = buffer.parse::<usize>().unwrap();
+                num_map.insert(
+                    NumberLocation::new(line_number, i - buffer.len(), i - 1),
+                    num,
+                );
+            }
+            buffer.clear();
+            if c != '.' {
+                // if it is a symbol
+                sym_map.insert((line_number, i));
+            }
+        }
+    }
+    if buffer.len() > 0 {
+        // if we have digits in the buffer
+        let num = buffer.parse::<usize>().unwrap();
+        num_map.insert(
+            NumberLocation::new(line_number, input.len() - buffer.len(), input.len() - 1),
+            num,
+        );
+    }
 }
 
 fn solve_2(input: &str) -> usize {
-    input.lines().map(parse_line_2).sum()
+    let mut num_map = HashMap::new();
+    let mut gear_mp = HashMap::new();
+
+    input
+        .lines()
+        .enumerate()
+        .map(|(line_number, line)| parse_line_2(line_number, line))
+        .for_each(|(x, y)| {
+            num_map.extend(x);
+            gear_mp.extend(y);
+        });
+
+    for (loc, n) in num_map {
+        let potentials = loc.expand();
+
+        for pot in potentials {
+            if let Some(foo) = gear_mp.get_mut(&pot) {
+                match *foo {
+                    (None, None) => *foo = (Some(n), None),
+                    (None, s) => *foo = (Some(n), s),
+                    (s, None) => *foo = (s, Some(n)),
+                    s => *foo = s,
+                }
+            }
+        }
+    }
+
+    gear_mp
+        .into_values()
+        .filter_map(|(fst, snd)| fst.and_then(|fst| snd.map(|snd| snd * fst)))
+        .sum()
+}
+
+fn parse_line_2(
+    line_number: usize,
+    input: &str,
+) -> (
+    HashMap<NumberLocation, usize>,
+    HashMap<(usize, usize), (Option<usize>, Option<usize>)>,
+) {
+    // where to store the buffers
+    let mut buffer = String::new();
+    // keys are the location of the digit , values are the digits and symbols
+    let mut num_map = HashMap::new();
+    let mut gear_mp = HashMap::new();
+
+    for (i, c) in input.char_indices() {
+        if c.is_ascii_digit() {
+            buffer.push(c)
+        } else {
+            // either a '.' or a symbol.
+            if buffer.len() > 0 {
+                // if we have digits in the buffer
+                let num = buffer.parse::<usize>().unwrap();
+                num_map.insert(
+                    NumberLocation::new(line_number, i - buffer.len(), i - 1),
+                    num,
+                );
+            }
+            buffer.clear();
+            if c == '*' {
+                // if it is a gear
+                gear_mp.insert((line_number, i), (None, None));
+            }
+        }
+    }
+    if buffer.len() > 0 {
+        // if we have digits in the buffer
+        let num = buffer.parse::<usize>().unwrap();
+        num_map.insert(
+            NumberLocation::new(line_number, input.len() - buffer.len(), input.len() - 1),
+            num,
+        );
+    }
+
+    (num_map, gear_mp)
+}
+
+#[allow(dead_code)]
+fn solve_2_try2(input: &str) -> usize {
+    let mut num_map = HashMap::new();
+    let mut gear_mp = HashMap::new();
+    let mut buffer = String::new();
+
+    input.lines().enumerate().for_each(|(line_number, line)| {
+        parse_line_2_try2(&mut buffer, &mut num_map, &mut gear_mp, line_number, line)
+    });
+
+    for (loc, n) in num_map {
+        let potentials = loc.expand();
+
+        for pot in potentials {
+            if let Some(foo) = gear_mp.get_mut(&pot) {
+                match *foo {
+                    (None, None) => *foo = (Some(n), None),
+                    (None, s) => *foo = (Some(n), s),
+                    (s, None) => *foo = (s, Some(n)),
+                    s => *foo = s,
+                }
+            }
+        }
+    }
+
+    gear_mp
+        .into_values()
+        .filter_map(|(fst, snd)| fst.and_then(|fst| snd.map(|snd| snd * fst)))
+        .sum()
+}
+
+fn parse_line_2_try2(
+    buffer: &mut String,
+    num_map: &mut HashMap<NumberLocation, usize>,
+    gear_mp: &mut HashMap<(usize, usize), (Option<usize>, Option<usize>)>,
+    line_number: usize,
+    input: &str,
+) {
+    for (i, c) in input.char_indices() {
+        if c.is_ascii_digit() {
+            buffer.push(c)
+        } else {
+            // either a '.' or a symbol.
+            if buffer.len() > 0 {
+                // if we have digits in the buffer
+                let num = buffer.parse::<usize>().unwrap();
+                num_map.insert(
+                    NumberLocation::new(line_number, i - buffer.len(), i - 1),
+                    num,
+                );
+            }
+            buffer.clear();
+            if c == '*' {
+                // if it is a gear
+                gear_mp.insert((line_number, i), (None, None));
+            }
+        }
+    }
+    if buffer.len() > 0 {
+        // if we have digits in the buffer
+        let num = buffer.parse::<usize>().unwrap();
+        num_map.insert(
+            NumberLocation::new(line_number, input.len() - buffer.len(), input.len() - 1),
+            num,
+        );
+    }
 }
 
 #[cfg(test)]
@@ -29,14 +310,39 @@ mod tests {
     use super::*;
     use test_case::test_case;
 
-    #[test_case("Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green" => 1)]
+    const EXAMPLE1: &str = indoc::indoc! {"
+    467..114..
+    ...*......
+    ..35..633.
+    ......#...
+    617*......
+    .....+.58.
+    ..592.....
+    ......755.
+    ...$.*....
+    .664.598.."};
+    const EXAMPLE2: &str = indoc::indoc! {"
+    467..114.
+    ...*.....
+    ..35..633
+    ......#..
+    617*.....
+    .....+.58
+    ..592....
+    ......755
+    ...$.*...
+    .664.598."};
+
+    #[test_case(EXAMPLE1 => 4361)]
+    #[test_case(EXAMPLE2 => 4361)]
     fn test_part_1(i: &str) -> usize {
-        parse_line_1(i)
+        solve_1(i)
     }
 
-    #[test_case("Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green" => 48)]
+    #[test_case(EXAMPLE1 => 467835)]
+    #[test_case(EXAMPLE2 => 467835)]
     fn test_part_2(i: &str) -> usize {
-        parse_line_2(i)
+        solve_2(i)
     }
 
     #[test]
@@ -45,6 +351,8 @@ mod tests {
 
         let options = Options::default();
         microbench::bench(&options, "part_1", || solve_1(INPUT));
+        microbench::bench(&options, "part_1 try 2", || solve_1_try2(INPUT));
         microbench::bench(&options, "part_2", || solve_2(INPUT));
+        microbench::bench(&options, "part_2 try 2", || solve_2_try2(INPUT));
     }
 }
