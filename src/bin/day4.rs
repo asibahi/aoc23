@@ -129,9 +129,7 @@ fn solve_2_try_2(input: &str) -> usize {
 
         cards_set
             .entry(idx)
-            .and_modify(|copies| {
-                *copies += 1;
-            })
+            .and_modify(|copies| *copies += 1)
             .or_insert(1);
 
         let copies_of_this_card = *cards_set.get(&idx).unwrap();
@@ -145,9 +143,7 @@ fn solve_2_try_2(input: &str) -> usize {
         for (i, _) in matches {
             cards_set
                 .entry(idx + i + 1)
-                .and_modify(|copies| {
-                    *copies += copies_of_this_card;
-                })
+                .and_modify(|copies| *copies += copies_of_this_card)
                 .or_insert(copies_of_this_card);
         }
     }
