@@ -34,18 +34,18 @@ fn parse_line_1(input: &str) -> u32 {
                     .filter(|(x, y)| x.eq(y))
                     .count() as u32;
 
-                (answers != 0).then(|| 2_u32.pow(answers - 1))
+                (answers != 0).then(|| 1 << (answers - 1))
             })
         })
         .unwrap_or_default()
 }
 
 #[allow(dead_code)]
-fn solve_1_try_2(input: &str) -> u32 {
+fn solve_1_try_2(input: &str) -> usize {
     input.lines().map(parse_line_1_try_2).sum()
 }
 
-fn parse_line_1_try_2(input: &str) -> u32 {
+fn parse_line_1_try_2(input: &str) -> usize {
     input
         .split_once(':')
         .and_then(|(_, info)| {
@@ -54,9 +54,9 @@ fn parse_line_1_try_2(input: &str) -> u32 {
                     .as_bytes()
                     .chunks_exact(3)
                     .filter(|chunk| B(havers).contains_str(B(chunk)))
-                    .count() as u32;
+                    .count();
 
-                (answers != 0).then(|| 2_u32.pow(answers - 1))
+                (answers != 0).then(|| 1 << (answers - 1))
             })
         })
         .unwrap_or_default()
@@ -197,7 +197,7 @@ mod tests {
     #[test_case("Card 4: 41 92 73 84 69 | 59 84 76 51 58  5 54 83" => 1)]
     #[test_case("Card 5: 87 83 26 28 32 | 88 30 70 12 93 22 82 36" => 0)]
     #[test_case("Card 6: 31 18 13 56 72 | 74 77 10 23 35 67 36 11" => 0)]
-    fn test_part_1(i: &str) -> u32 {
+    fn test_part_1(i: &str) -> usize {
         parse_line_1_try_2(i)
     }
 
