@@ -28,12 +28,12 @@ fn parse_line_1(input: &str) -> u32 {
         .split_once(':')
         .and_then(|(_, info)| {
             info.split_once('|').map(|(winners, havers)| {
-                let answers = winners
+                1 << (winners
                     .split_ascii_whitespace()
                     .cartesian_product(havers.split_ascii_whitespace())
                     .filter(|(x, y)| x.eq(y))
-                    .count() as u32;
-                1 << answers >> 1
+                    .count() as u32)
+                    >> 1
             })
         })
         .unwrap_or_default()
@@ -53,7 +53,8 @@ fn parse_line_1_try_2(input: &str) -> usize {
                     .as_bytes()
                     .chunks_exact(3)
                     .filter(|chunk| B(havers).contains_str(B(chunk)))
-                    .count() >> 1
+                    .count()
+                    >> 1
             })
         })
         .unwrap_or_default()
