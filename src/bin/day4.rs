@@ -27,14 +27,13 @@ fn parse_line_1(input: &str) -> u32 {
     input
         .split_once(':')
         .and_then(|(_, info)| {
-            info.split_once('|').and_then(|(winners, havers)| {
+            info.split_once('|').map(|(winners, havers)| {
                 let answers = winners
                     .split_ascii_whitespace()
                     .cartesian_product(havers.split_ascii_whitespace())
                     .filter(|(x, y)| x.eq(y))
                     .count() as u32;
-
-                (answers != 0).then(|| 1 << (answers - 1))
+                1 << answers >> 1
             })
         })
         .unwrap_or_default()
@@ -49,27 +48,16 @@ fn parse_line_1_try_2(input: &str) -> usize {
     input
         .split_once(':')
         .and_then(|(_, info)| {
-            info.split_once('|').and_then(|(winners, havers)| {
-                let answers = winners
+            info.split_once('|').map(|(winners, havers)| {
+                1 << winners
                     .as_bytes()
                     .chunks_exact(3)
                     .filter(|chunk| B(havers).contains_str(B(chunk)))
-                    .count();
-
-                (answers != 0).then(|| 1 << (answers - 1))
+                    .count() >> 1
             })
         })
         .unwrap_or_default()
 }
-
-/*
- * Card 1: 41 48 83 86 17 | 83 86  6 31 17  9 48 53
- * Card 2: 13 32 20 16 61 | 61 30 68 82 17 32 24 19
- * Card 3:  1 21 53 59 44 | 69 82 63 72 16 21 14  1
- * Card 4: 41 92 73 84 69 | 59 84 76 51 58  5 54 83
- * Card 5: 87 83 26 28 32 | 88 30 70 12 93 22 82 36
- * Card 6: 31 18 13 56 72 | 74 77 10 23 35 67 36 11
- */
 
 fn solve_2(input: &str) -> usize {
     let numbered_lines = input
@@ -103,9 +91,9 @@ fn solve_2(input: &str) -> usize {
             cards_set
                 .entry(idx + i + 1)
                 .and_modify(|(_, copies)| {
-                    *copies += 1 * copies_of_this_card;
+                    *copies += copies_of_this_card;
                 })
-                .or_insert((false, 1 * copies_of_this_card));
+                .or_insert((false, copies_of_this_card));
         }
     }
 
@@ -186,6 +174,27 @@ fn solve_2_try_3(input: &str) -> usize {
     running_sum
 }
 
+#[allow(dead_code)]
+fn solve_2_try_4(input: &str) -> usize {
+    let mut cards_set = vec![1; 500];
+    input
+        .lines()
+        .map(|line| line.split_at(9).1)
+        .enumerate()
+        .map(|(idx, line)| {
+            let (winners, havers) = line.split_at(32);
+            for (i, _) in B(winners)
+                .chunks_exact(3)
+                .filter(|chunk| B(havers).contains_str(B(chunk)))
+                .enumerate()
+            {
+                cards_set[idx + i + 1] += cards_set[idx];
+            }
+            cards_set[idx]
+        })
+        .sum()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -227,5 +236,6 @@ mod tests {
         microbench::bench(&options, "original part 2", || solve_2(INPUT));
         microbench::bench(&options, "try 2    part 2", || solve_2_try_2(INPUT));
         microbench::bench(&options, "try 3    part 2", || solve_2_try_3(INPUT));
+        microbench::bench(&options, "try 4    part 2", || solve_2_try_4(INPUT));
     }
 }
