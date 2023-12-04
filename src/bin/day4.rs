@@ -15,6 +15,8 @@ fn main() {
     println!("Part 2:\t{res}");
     let res = solve_2_try_2(INPUT);
     println!("Part 2, try 2:\t{res}");
+    let res = solve_2_try_3(INPUT);
+    println!("Part 2, try 3:\t{res}");
 }
 
 fn solve_1(input: &str) -> u32 {
@@ -151,6 +153,39 @@ fn solve_2_try_2(input: &str) -> usize {
     running_sum
 }
 
+#[allow(dead_code)]
+fn solve_2_try_3(input: &str) -> usize {
+    let numbered_lines = input
+        .lines()
+        // hard coded for available input
+        .map(|line| line.split_at(9).1)
+        .enumerate();
+
+    let mut cards_set = vec![0; 500];
+    let mut running_sum = 0;
+
+    for (idx, line) in numbered_lines {
+        // hard coded for available input
+        let (winners, havers) = line.split_at(32);
+
+        cards_set[idx] += 1;
+
+        let copies_of_this_card = cards_set[idx];
+        running_sum += copies_of_this_card;
+
+        let matches = B(winners)
+            .chunks_exact(3)
+            .filter(|chunk| B(havers).contains_str(B(chunk)))
+            .enumerate();
+
+        for (i, _) in matches {
+            cards_set[idx + i + 1] += copies_of_this_card;
+        }
+    }
+
+    running_sum
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -184,12 +219,13 @@ mod tests {
         use microbench::{self, Options};
 
         // use this terminal command
-        // cargo test --package aoc23 --bin day2 --release  -- tests::bench --exact --nocapture
+        // cargo test --package aoc23 --bin day4 --release -- tests::bench --exact --nocapture
 
         let options = Options::default();
         microbench::bench(&options, "original part 1", || solve_1(INPUT));
         microbench::bench(&options, "try 2    part 1", || solve_1_try_2(INPUT));
         microbench::bench(&options, "original part 2", || solve_2(INPUT));
         microbench::bench(&options, "try 2    part 2", || solve_2_try_2(INPUT));
+        microbench::bench(&options, "try 3    part 2", || solve_2_try_3(INPUT));
     }
 }
