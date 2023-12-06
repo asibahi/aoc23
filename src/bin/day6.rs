@@ -34,7 +34,7 @@ fn solve_1(input: &str) -> usize {
             roots::Roots::Two(two) => {
                 let bottom = two[0].ceil() as usize;
                 let top = two[1].floor() as usize;
-                dbg!(top) - dbg!(bottom) + 1
+                top - bottom + 1
             }
             _ => 0,
         };
@@ -71,7 +71,7 @@ fn solve_2(input: &str) -> usize {
         roots::Roots::Two(two) => {
             let bottom = two[0].ceil() as usize;
             let top = two[1].floor() as usize;
-            dbg!(top) - dbg!(bottom) + 1
+            top - bottom + 1
         }
         _ => 0,
     };
