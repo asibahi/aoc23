@@ -31,7 +31,7 @@ mod tests {
     use super::*;
     use test_case::test_case;
 
-    const EXAMPLE : &str = "insert example here";
+    const EXAMPLE: &str = "insert example here";
 
     #[test_case(EXAMPLE => 0)]
     fn test_part_1(i: &str) -> usize {
