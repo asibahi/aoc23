@@ -1,4 +1,4 @@
-//
+use itertools::Itertools;
 
 const INPUT: &str = include_str!("../../input/day6.txt");
 
@@ -11,74 +11,64 @@ fn main() {
 }
 
 fn solve_1(input: &str) -> usize {
-    let mut lines = input.lines();
-    let times = lines
-        .next()
-        .unwrap()
-        .split_ascii_whitespace()
-        .skip(1)
-        .map(|s| s.parse::<f64>().unwrap());
-    let distances_time = lines
-        .next()
-        .unwrap()
-        .split_ascii_whitespace()
-        .skip(1)
-        .map(|s| s.parse::<f64>().unwrap())
-        .zip(times);
+    let (ts, ds) = input
+        .lines()
+        .map(|line| {
+            line.split_ascii_whitespace()
+                .skip(1)
+                .map(|s| s.parse::<f64>().unwrap())
+        })
+        .collect_tuple()
+        .unwrap();
 
-    let mut acc = 1;
-
-    for (dist, time) in distances_time {
-        let r = roots::find_roots_quadratic(1.0, -time, dist + 0.01);
-        let bounds = match r {
-            roots::Roots::Two(two) => {
-                let bottom = two[0].ceil() as usize;
-                let top = two[1].floor() as usize;
-                top - bottom + 1
-            }
-            _ => 0,
-        };
-
-        acc *= bounds
-    }
-
-    acc
+    ts.zip(ds)
+        .map(|(time, dist)| {
+            let roots::Roots::Two([bottom, top]) =
+                roots::find_roots_quadratic(1.0, -time, dist + 0.01)
+            else {
+                panic!();
+            };
+            (top.floor() as usize) - (bottom.ceil() as usize) + 1
+        })
+        .product()
 }
 
 fn solve_2(input: &str) -> usize {
-    let mut lines = input.lines();
-    let time = lines
-        .next()
-        .unwrap()
-        .split_at(10)
-        .1
-        .replace(" ", "")
-        .parse::<f64>()
-        .unwrap();
-    let dist = lines
-        .next()
-        .unwrap()
-        .split_at(10)
-        .1
-        .replace(" ", "")
-        .parse::<f64>()
+    let (time, dist) = input
+        .lines()
+        .map(|line| line.split_at(10).1.replace(" ", "").parse::<f64>().unwrap())
+        .collect_tuple()
         .unwrap();
 
-    let mut acc = 1;
-
-    let r = roots::find_roots_quadratic(1.0, -time, dist + 0.01);
-    let bounds = match r {
-        roots::Roots::Two(two) => {
-            let bottom = two[0].ceil() as usize;
-            let top = two[1].floor() as usize;
-            top - bottom + 1
-        }
-        _ => 0,
+    let roots::Roots::Two([bottom, top]) = roots::find_roots_quadratic(1.0, -time, dist + 0.01)
+    else {
+        panic!();
     };
 
-    acc *= bounds;
+    (top.floor() as usize) - (bottom.ceil() as usize) + 1
+}
 
-    acc
+#[allow(dead_code)]
+fn solve_2_try_2(input: &str) -> usize {
+    let (time, dist) = input
+        .lines()
+        .map(|line| {
+            line.split_at(10)
+                .1
+                .split_ascii_whitespace()
+                .collect::<String>()
+                .parse::<f64>()
+                .unwrap()
+        })
+        .collect_tuple()
+        .unwrap();
+
+    let roots::Roots::Two([bottom, top]) = roots::find_roots_quadratic(1.0, -time, dist + 0.01)
+    else {
+        panic!();
+    };
+
+    (top.floor() as usize) - (bottom.ceil() as usize) + 1
 }
 
 #[cfg(test)]
@@ -109,5 +99,6 @@ mod tests {
         let options = Options::default();
         microbench::bench(&options, "original part 1", || solve_1(INPUT));
         microbench::bench(&options, "original part 2", || solve_2(INPUT));
+        microbench::bench(&options, "split ws part 2", || solve_2_try_2(INPUT));
     }
 }
