@@ -8,7 +8,7 @@ mod part_1 {
     use counter::Counter;
     use itertools::Itertools;
 
-    #[derive(PartialEq, Eq, PartialOrd, Ord, Hash)]
+    #[derive(PartialEq, Eq, PartialOrd, Ord)]
     enum Rank {
         Two,
         Three,
@@ -101,7 +101,7 @@ mod part_2 {
     use counter::Counter;
     use itertools::Itertools;
 
-    #[derive(PartialEq, Eq, PartialOrd, Ord, Hash)]
+    #[derive(PartialEq, Eq, PartialOrd, Ord)]
     enum Rank {
         Joker,
         Two,
