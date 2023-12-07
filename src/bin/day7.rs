@@ -165,7 +165,6 @@ mod part_2 {
                 .unwrap();
 
             let hand_type = match counts {
-                (0, 0) => HandType::FiveOfAKind,
                 (x, _) if x + jokers == 5 => HandType::FiveOfAKind,
                 (x, _) if x + jokers == 4 => HandType::FourOfAKind,
                 (x, 2) if x + jokers == 3 => HandType::FullHouse,
