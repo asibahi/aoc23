@@ -68,10 +68,10 @@ mod part_1 {
 
             let counts = input.bytes().collect::<Counter<_>>();
             let counts = counts
-                .most_common()
-                .iter()
-                .map(|i| i.1)
-                .pad_using(2, |_| 0)
+                .values()
+                .sorted()
+                .rev()
+                .pad_using(2, |_| &0)
                 .next_tuple()
                 .unwrap();
 
@@ -157,10 +157,10 @@ mod part_2 {
             let mut counts = input.bytes().collect::<Counter<_>>();
             let jokers = counts.remove(&b'J').unwrap_or_default();
             let counts = counts
-                .most_common()
-                .iter()
-                .map(|i| i.1)
-                .pad_using(2, |_| 0)
+                .values()
+                .sorted()
+                .rev()
+                .pad_using(2, |_| &0)
                 .next_tuple()
                 .unwrap();
 
