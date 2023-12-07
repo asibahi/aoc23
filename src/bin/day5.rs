@@ -45,13 +45,13 @@ fn solve_1(input: &str) -> i64 {
                 .skip(1)
                 .filter(|l| !l.is_empty())
                 .map(|line| {
-                    let (foo, bar, baz) = line
+                    let (dist, source, range) = line
                         .split_ascii_whitespace()
                         .map(|s| s.parse::<i64>().unwrap())
                         .collect_tuple()
                         .unwrap_or_default();
 
-                    Op(bar, foo - bar, baz)
+                    Op(source, dist - source, range)
                 })
                 .collect();
 
@@ -81,8 +81,7 @@ fn solve_2(input: &str) -> i64 {
         .split_ascii_whitespace()
         .map(|s| s.parse::<i64>().unwrap())
         .tuples()
-        .map(|(x, y)| (x..x + y))
-        .flatten();
+        .flat_map(|(x, y)| (x..x + y));
 
     let maps: Vec<Map> = sections
         .map(|section| {
@@ -91,13 +90,13 @@ fn solve_2(input: &str) -> i64 {
                 .skip(1)
                 .filter(|l| !l.is_empty())
                 .map(|line| {
-                    let (foo, bar, baz) = line
+                    let (dist, source, range) = line
                         .split_ascii_whitespace()
                         .map(|s| s.parse::<i64>().unwrap())
                         .collect_tuple()
                         .unwrap_or_default();
 
-                    Op(bar, foo - bar, baz)
+                    Op(source, dist - source, range)
                 })
                 .collect();
 

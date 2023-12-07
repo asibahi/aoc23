@@ -36,7 +36,7 @@ fn solve_1(input: &str) -> usize {
 fn solve_2(input: &str) -> usize {
     let (time, dist) = input
         .lines()
-        .map(|line| line.split_at(10).1.replace(" ", "").parse::<f64>().unwrap())
+        .map(|line| line.split_at(10).1.replace(' ', "").parse::<f64>().unwrap())
         .collect_tuple()
         .unwrap();
 
