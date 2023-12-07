@@ -69,8 +69,7 @@ mod part_1 {
             let counts = input.bytes().collect::<Counter<_>>();
             let counts = counts
                 .values()
-                .sorted()
-                .rev()
+                .sorted_unstable_by(|a, b| b.cmp(a))
                 .pad_using(2, |_| &0)
                 .next_tuple()
                 .unwrap();
@@ -158,8 +157,7 @@ mod part_2 {
             let jokers = counts.remove(&b'J').unwrap_or_default();
             let counts = counts
                 .values()
-                .sorted()
-                .rev()
+                .sorted_unstable_by(|a, b| b.cmp(a))
                 .pad_using(2, |_| &0)
                 .next_tuple()
                 .unwrap();
