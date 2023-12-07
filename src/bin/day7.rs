@@ -168,9 +168,8 @@ mod part_2 {
                 (x, _) if x + jokers == 5 => HandType::FiveOfAKind,
                 (x, _) if x + jokers == 4 => HandType::FourOfAKind,
                 (x, 2) if x + jokers == 3 => HandType::FullHouse,
-                (3, x) if x + jokers == 2 => HandType::FullHouse,
                 (x, _) if x + jokers == 3 => HandType::ThreeOfAKind,
-                (x, 2) | (2, x) if x + jokers == 2 => HandType::TwoPair,
+                (2, x) if x + jokers == 2 => HandType::TwoPair,
                 (x, _) if x + jokers == 2 => HandType::OnePair,
                 _ => HandType::HighCard,
             };
