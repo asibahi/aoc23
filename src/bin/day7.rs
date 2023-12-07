@@ -67,30 +67,25 @@ mod part_1 {
             // for example: 32T3K
 
             let counts = input.bytes().collect::<Counter<_>>();
-            let counts = counts.values().sorted().rev().collect_vec();
-            // let counts = counts.most_common();
+            let counts = counts
+                .most_common()
+                .iter()
+                .map(|i| i.1)
+                .pad_using(2, |_| 0)
+                .next_tuple()
+                .unwrap();
 
-            let hand_type = if *counts[0] == 5 {
-                HandType::FiveOfAKind
-            } else if *counts[0] == 4 {
-                HandType::FourOfAKind
-            } else if *counts[0] == 3 && *counts[1] == 2 {
-                HandType::FullHouse
-            } else if *counts[0] == 3 {
-                HandType::ThreeOfAKind
-            } else if *counts[0] == 2 && *counts[1] == 2 {
-                HandType::TwoPair
-            } else if *counts[0] == 2 {
-                HandType::OnePair
-            } else {
-                HandType::HighCard
+            let hand_type = match counts {
+                (5, _) => HandType::FiveOfAKind,
+                (4, _) => HandType::FourOfAKind,
+                (3, 2) => HandType::FullHouse,
+                (3, _) => HandType::ThreeOfAKind,
+                (2, 2) => HandType::TwoPair,
+                (2, _) => HandType::OnePair,
+                _ => HandType::HighCard,
             };
 
-            let literal = input
-                .bytes()
-                .map(|b| Rank::from(b))
-                .collect_tuple()
-                .unwrap();
+            let literal = input.bytes().map(Rank::from).collect_tuple().unwrap();
 
             Self { hand_type, literal }
         }
@@ -161,33 +156,27 @@ mod part_2 {
 
             let mut counts = input.bytes().collect::<Counter<_>>();
             let jokers = counts.remove(&b'J').unwrap_or_default();
-            let counts = counts.values().sorted().rev().collect_vec();
+            let counts = counts
+                .most_common()
+                .iter()
+                .map(|i| i.1)
+                .pad_using(2, |_| 0)
+                .next_tuple()
+                .unwrap();
 
-            let hand_type = if counts.is_empty() || *counts[0] + jokers == 5 {
-                HandType::FiveOfAKind
-            } else if *counts[0] + jokers == 4 {
-                HandType::FourOfAKind
-            } else if *counts[0] + jokers == 3 && *counts[1] == 2 {
-                HandType::FullHouse
-            } else if *counts[0] == 3 && *counts[1] + jokers == 2 {
-                HandType::FullHouse
-            } else if *counts[0] + jokers == 3 {
-                HandType::ThreeOfAKind
-            } else if *counts[0] + jokers == 2 && *counts[1] == 2 {
-                HandType::TwoPair
-            } else if *counts[0] == 2 && *counts[1] + jokers == 2 {
-                HandType::TwoPair
-            } else if *counts[0] + jokers == 2 {
-                HandType::OnePair
-            } else {
-                HandType::HighCard
+            let hand_type = match counts {
+                (0, 0) => HandType::FiveOfAKind,
+                (x, _) if x + jokers == 5 => HandType::FiveOfAKind,
+                (x, _) if x + jokers == 4 => HandType::FourOfAKind,
+                (x, 2) if x + jokers == 3 => HandType::FullHouse,
+                (3, x) if x + jokers == 2 => HandType::FullHouse,
+                (x, _) if x + jokers == 3 => HandType::ThreeOfAKind,
+                (x, 2) | (2, x) if x + jokers == 2 => HandType::TwoPair,
+                (x, _) if x + jokers == 2 => HandType::OnePair,
+                _ => HandType::HighCard,
             };
 
-            let literal = input
-                .bytes()
-                .map(|b| Rank::from(b))
-                .collect_tuple()
-                .unwrap();
+            let literal = input.bytes().map(Rank::from).collect_tuple().unwrap();
 
             Self { hand_type, literal }
         }
