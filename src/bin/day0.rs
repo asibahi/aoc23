@@ -11,19 +11,11 @@ fn main() {
 }
 
 fn solve_1(input: &str) -> usize {
-    input.lines().map(parse_line_1).sum()
-}
-
-fn parse_line_1(input: &str) -> usize {
-    input.len()
+    input.lines().map(|i| i.len()).sum()
 }
 
 fn solve_2(input: &str) -> usize {
-    input.lines().map(parse_line_2).sum()
-}
-
-fn parse_line_2(input: &str) -> usize {
-    input.len()
+    input.lines().map(|i| i.len()).sum()
 }
 
 #[cfg(test)]
