@@ -19,15 +19,7 @@ fn solve_1(input: &str) -> usize {
     let mut maps = HashMap::new();
 
     for line in input.lines() {
-        if line.is_empty() {
-            continue;
-        }
-
-        let name = &line[0..3];
-        let left = &line[7..10];
-        let right = &line[12..15];
-
-        maps.insert(name, (left, right));
+        maps.insert(&line[0..3], (&line[7..10], &line[12..15]));
     }
 
     let mut current_loc = "AAA";
@@ -54,18 +46,8 @@ fn solve_2(input: &str) -> usize {
     let mut maps = HashMap::new();
 
     for line in input.lines() {
-        if line.is_empty() {
-            continue;
-        }
-
-        let name = &line[0..3];
-        let left = &line[7..10];
-        let right = &line[12..15];
-
-        maps.insert(name, (left, right));
+        maps.insert(&line[0..3], (&line[7..10], &line[12..15]));
     }
-
-    let maps = maps;
 
     let current_locs = maps.keys().cloned().filter(|s| s.ends_with('A'));
 
@@ -84,7 +66,7 @@ fn solve_2(input: &str) -> usize {
             }
             1
         })
-        .fold(1, |acc, x| num::integer::lcm(acc, x))
+        .fold(1, num::integer::lcm)
 }
 
 #[cfg(test)]
