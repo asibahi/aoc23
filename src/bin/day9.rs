@@ -121,6 +121,35 @@ fn parse_line_2(input: &str) -> isize {
         .rfold(0, |dec, seq| seq.first().unwrap() - dec)
 }
 
+#[allow(dead_code)]
+fn solve_2_recursion(input: &str) -> isize {
+    input.lines().map(parse_line_2_recursion).sum()
+}
+
+fn parse_line_2_recursion(input: &str) -> isize {
+    let mut nums = input
+        .split_ascii_whitespace()
+        .map(|s| s.parse::<isize>().unwrap())
+        .collect_vec();
+
+    fn prev_num(seq: &mut [isize]) -> isize {
+        if let Ok(v) = seq.iter().all_equal_value() {
+            return *v;
+        }
+
+        let len = seq.len();
+        let first = seq[0];
+
+        for i in (1..len).rev() {
+            seq[i] = seq[i] - seq[i - 1];
+        }
+
+        first - prev_num(&mut seq[1..len])
+    }
+
+    prev_num(nums.as_mut_slice())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -138,7 +167,7 @@ mod tests {
 
     #[test_case(EXAMPLE => 2)]
     fn test_part_2(i: &str) -> isize {
-        solve_2(i)
+        solve_2_recursion(i)
     }
 
     #[test_case("0 3 6 9 12 15" => 18)]
@@ -164,5 +193,8 @@ mod tests {
             solve_1_recursion_2(INPUT)
         });
         microbench::bench(&options, "Vec<Vec<_>>   part 2", || solve_2(INPUT));
+        microbench::bench(&options, "mut recursion part 2", || {
+            solve_2_recursion(INPUT)
+        });
     }
 }
