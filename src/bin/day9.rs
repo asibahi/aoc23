@@ -36,8 +36,7 @@ fn parse_line_1(input: &str) -> isize {
 
     sequences
         .into_iter()
-        .rev()
-        .fold(0, |inc, seq| inc + seq.last().unwrap())
+        .rfold(0, |inc, seq| inc + seq.last().unwrap())
 }
 
 #[allow(dead_code)]
@@ -119,8 +118,7 @@ fn parse_line_2(input: &str) -> isize {
 
     sequences
         .into_iter()
-        .rev()
-        .fold(0, |dec, seq| seq.first().unwrap() - dec)
+        .rfold(0, |dec, seq| seq.first().unwrap() - dec)
 }
 
 #[cfg(test)]
