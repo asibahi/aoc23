@@ -150,6 +150,41 @@ fn parse_line_2_recursion(input: &str) -> isize {
     prev_num(nums.as_mut_slice())
 }
 
+#[allow(dead_code)]
+fn solve_2_recursion_2(input: &str) -> isize {
+    let mut my_vec = Vec::with_capacity(21);
+    input
+        .lines()
+        .map(|s| parse_line_2_recursion_2(s, &mut my_vec))
+        .sum()
+}
+
+fn parse_line_2_recursion_2(input: &str, nums: &mut Vec<isize>) -> isize {
+    nums.clear();
+    nums.extend(
+        input
+            .split_ascii_whitespace()
+            .map(|s| s.parse::<isize>().unwrap()),
+    );
+
+    fn prev_num(seq: &mut [isize]) -> isize {
+        if let Ok(v) = seq.iter().all_equal_value() {
+            return *v;
+        }
+
+        let len = seq.len();
+        let first = seq[0];
+
+        for i in (1..len).rev() {
+            seq[i] = seq[i] - seq[i - 1];
+        }
+
+        first - prev_num(&mut seq[1..len])
+    }
+
+    prev_num(nums.as_mut_slice())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -195,6 +230,9 @@ mod tests {
         microbench::bench(&options, "Vec<Vec<_>>   part 2", || solve_2(INPUT));
         microbench::bench(&options, "mut recursion part 2", || {
             solve_2_recursion(INPUT)
+        });
+        microbench::bench(&options, "mut rec 2     part 2", || {
+            solve_2_recursion_2(INPUT)
         });
     }
 }
