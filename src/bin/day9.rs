@@ -1,5 +1,3 @@
-//
-
 use itertools::Itertools;
 
 const INPUT: &str = include_str!("../../input/day9.txt");
@@ -36,13 +34,10 @@ fn parse_line_1(input: &str) -> isize {
         sequences.push(windows);
     }
 
-    let mut increment = 0;
-
-    for seq in sequences.into_iter().rev() {
-        increment += seq.last().unwrap();
-    }
-
-    increment
+    sequences
+        .into_iter()
+        .rev()
+        .fold(0, |inc, seq| inc + seq.last().unwrap())
 }
 
 fn solve_2(input: &str) -> isize {
@@ -69,13 +64,10 @@ fn parse_line_2(input: &str) -> isize {
         sequences.push(windows);
     }
 
-    let mut decrement = 0;
-
-    for seq in sequences.into_iter().rev() {
-        decrement = seq.first().unwrap() - decrement;
-    }
-
-    decrement
+    sequences
+        .into_iter()
+        .rev()
+        .fold(0, |dec, seq| seq.first().unwrap() - dec)
 }
 
 #[cfg(test)]
