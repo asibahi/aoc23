@@ -1,3 +1,4 @@
+use itertools::Itertools;
 use std::collections::HashSet;
 
 const INPUT: &str = include_str!("../../input/day10.txt");
@@ -9,7 +10,7 @@ fn main() {
     let res = solve_2(INPUT);
     println!("Part 2:\t{res}");
 
-    assert_eq!(res, solve_2_try_2(INPUT));
+    assert_eq!(res, solve_2_shoelace(INPUT));
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -438,6 +439,111 @@ fn solve_2_try_2(input: &str) -> usize {
     inner_counter
 }
 
+#[allow(dead_code)]
+fn solve_2_shoelace(input: &str) -> usize {
+    let width = input.lines().next().unwrap().len() + 1;
+
+    let mut current_loc = {
+        let start_loc = input.find('S').unwrap();
+        (
+            start_loc / width, // row
+            start_loc % width, // column
+        )
+    };
+    let input = input.as_bytes();
+
+    let mut points = Vec::new();
+
+    let mut current_pipe = input[current_loc.0 * width + current_loc.1];
+    let mut came_by = None;
+
+    loop {
+        // This runs once
+        let Some(dir) = came_by.as_ref() else {
+            let (row, col, new_pipe) = 'checker: {
+                // check right
+                let (row, col) = (current_loc.0, current_loc.1 + 1);
+                let new_pipe = input[row * width + col];
+                if new_pipe == b'7' || new_pipe == b'J' || new_pipe == b'-' {
+                    came_by = Some(Dir::Right);
+                    break 'checker (row, col, new_pipe);
+                }
+                // check down
+                let (row, col) = (current_loc.0 + 1, current_loc.1);
+                let new_pipe = input[row * width + col];
+                if new_pipe == b'J' || new_pipe == b'L' || new_pipe == b'|' {
+                    came_by = Some(Dir::Down);
+                    break 'checker (row, col, new_pipe);
+                }
+                // check left
+                let (row, col) = (current_loc.0, current_loc.1 - 1);
+                let new_pipe = input[row * width + col];
+                if new_pipe == b'L' || new_pipe == b'F' || new_pipe == b'-' {
+                    came_by = Some(Dir::Left);
+                    break 'checker (row, col, new_pipe);
+                }
+                // check up
+                let (row, col) = (current_loc.0 - 1, current_loc.1);
+                let new_pipe = input[row * width + col];
+                if new_pipe == b'7' || new_pipe == b'F' || new_pipe == b'|' {
+                    came_by = Some(Dir::Up);
+                    break 'checker (row, col, new_pipe);
+                }
+                unreachable!()
+            };
+            current_loc = (row, col);
+            current_pipe = new_pipe;
+            points.push((row, col));
+
+            continue;
+        };
+
+        let (row, col) = match (dir, current_pipe) {
+            // go right
+            (Dir::Up, b'F') | (Dir::Down, b'L') | (Dir::Right, b'-') => {
+                came_by = Some(Dir::Right);
+                (current_loc.0, current_loc.1 + 1)
+            }
+            // go up
+            (Dir::Right, b'J') | (Dir::Left, b'L') | (Dir::Up, b'|') => {
+                came_by = Some(Dir::Up);
+                (current_loc.0 - 1, current_loc.1)
+            }
+            // go down
+            (Dir::Right, b'7') | (Dir::Left, b'F') | (Dir::Down, b'|') => {
+                came_by = Some(Dir::Down);
+                (current_loc.0 + 1, current_loc.1)
+            }
+            // go left
+            (Dir::Down, b'J') | (Dir::Up, b'7') | (Dir::Left, b'-') => {
+                came_by = Some(Dir::Left);
+                (current_loc.0, current_loc.1 - 1)
+            }
+            (_, b'S') => break,
+            _ => unreachable!(),
+        };
+        current_loc = (row, col);
+        current_pipe = input[row * width + col];
+        points.push((row, col));
+    }
+    //
+
+    // Shoelace theorem
+    let shoelace = points
+        .iter()
+        .circular_tuple_windows()
+        .map(|((row1, col1), (row2, col2))| (row1 * col2, row2 * col1))
+        .fold((0, 0), |acc, prod| (acc.0 + prod.0, acc.1 + prod.1));
+
+    let area = shoelace.0.abs_diff(shoelace.1) / 2;
+
+    // Pick's Theorem
+    // A = i + (b/2) - 1
+    // i = A - (b/2) + 1
+
+    area - (points.len() / 2) + 1
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -476,5 +582,6 @@ mod tests {
         microbench::bench(&options, "original part 1", || solve_1(INPUT));
         microbench::bench(&options, "original part 2", || solve_2(INPUT));
         microbench::bench(&options, "try 2    part 2", || solve_2_try_2(INPUT));
+        microbench::bench(&options, "whoelace part 2", || solve_2_shoelace(INPUT));
     }
 }
