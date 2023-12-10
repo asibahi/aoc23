@@ -1,7 +1,3 @@
-// use itertools::Itertools;
-
-// use std::{thread::sleep, time::Duration};
-
 const INPUT: &str = include_str!("../../input/day10.txt");
 
 fn main() {
@@ -122,7 +118,157 @@ fn solve_1(input: &str) -> usize {
 }
 
 fn solve_2(input: &str) -> usize {
-    input.lines().map(|i| i.len()).sum()
+    let width = input.lines().next_back().unwrap().len() + 1;
+
+    let mut current_loc = {
+        let start_loc = input.find('S').unwrap();
+        (
+            start_loc / width, // row
+            start_loc % width, // column
+        )
+    };
+
+    let mut points = vec![];
+
+    let mut current_pipe = input.as_bytes()[current_loc.0 * width + current_loc.1];
+    let mut came_by = None;
+
+    loop {
+        // This runs once
+        let Some(dir) = came_by.as_ref() else {
+            // check up
+            if current_loc.0 > 0 {
+                let (row, col) = (current_loc.0 - 1, current_loc.1);
+                let new_pipe = input.as_bytes()[row * width + col];
+                if new_pipe == b'7' || new_pipe == b'F' || new_pipe == b'|' {
+                    current_loc = (row, col);
+                    current_pipe = new_pipe;
+                    came_by = Some(Direction::Up);
+                    points.push((row, col));
+                    continue;
+                }
+            }
+            // check right
+            let (row, col) = (current_loc.0, current_loc.1 + 1);
+            let new_pipe = input.as_bytes()[row * width + col];
+            if new_pipe == b'7' || new_pipe == b'J' || new_pipe == b'_' {
+                current_loc = (row, col);
+                current_pipe = new_pipe;
+                came_by = Some(Direction::Right);
+                points.push((row, col));
+                continue;
+            }
+            // check down
+            let (row, col) = (current_loc.0 + 1, current_loc.1); // OVERFLOW
+            let new_pipe = input.as_bytes()[row * width + col];
+            if new_pipe == b'J' || new_pipe == b'L' || new_pipe == b'|' {
+                current_loc = (row, col);
+                current_pipe = new_pipe;
+                came_by = Some(Direction::Down);
+                points.push((row, col));
+                continue;
+            }
+            // check left
+            let (row, col) = (current_loc.0, current_loc.1 - 1); // OVERFLOW
+            let new_pipe = input.as_bytes()[row * width + col];
+            if new_pipe == b'L' || new_pipe == b'F' || new_pipe == b'_' {
+                current_loc = (row, col);
+                current_pipe = new_pipe;
+                came_by = Some(Direction::Left);
+                points.push((row, col));
+                continue;
+            }
+            unreachable!()
+        };
+
+        match (dir, current_pipe) {
+            // go right
+            (Direction::Up, b'F') | (Direction::Down, b'L') | (Direction::Right, b'-') => {
+                let (row, col) = (current_loc.0, current_loc.1 + 1);
+                current_loc = (row, col);
+                current_pipe = input.as_bytes()[row * width + col];
+                came_by = Some(Direction::Right);
+                points.push((row, col));
+            }
+            // go up
+            (Direction::Right, b'J') | (Direction::Left, b'L') | (Direction::Up, b'|') => {
+                let (row, col) = (current_loc.0 - 1, current_loc.1);
+                current_loc = (row, col);
+                current_pipe = input.as_bytes()[row * width + col];
+                came_by = Some(Direction::Up);
+                points.push((row, col));
+            }
+            // go down
+            (Direction::Right, b'7') | (Direction::Left, b'F') | (Direction::Down, b'|') => {
+                let (row, col) = (current_loc.0 + 1, current_loc.1); // OVERFLOW
+                current_loc = (row, col);
+                current_pipe = input.as_bytes()[row * width + col];
+                came_by = Some(Direction::Down);
+                points.push((row, col));
+            }
+            // go left
+            (Direction::Down, b'J') | (Direction::Up, b'7') | (Direction::Left, b'-') => {
+                let (row, col) = (current_loc.0, current_loc.1 - 1); // OVERFLOW
+                current_loc = (row, col);
+                current_pipe = input.as_bytes()[row * width + col];
+                came_by = Some(Direction::Left);
+                points.push((row, col));
+            }
+            (_, b'S') => {
+                break;
+            }
+            _ => eprintln!("----------> DEAD ZONE"),
+        }
+    }
+
+    #[allow(unused)]
+    let count_intersections = |row, col| {
+        if points.contains(&(row, col)) {
+            return false;
+        }
+        let sticks = points
+            .iter()
+            .filter(|(r, c)| *r == row && *c > col)
+            .filter(|(r, c)| input.as_bytes()[r * width + c] == b'|')
+            .count();
+        let effs = points
+            .iter()
+            .filter(|(r, c)| *r == row && *c > col)
+            .filter(|(r, c)| input.as_bytes()[r * width + c] == b'F')
+            .count();
+        let sevens = points
+            .iter()
+            .filter(|(r, c)| *r == row && *c > col)
+            .filter(|(r, c)| input.as_bytes()[r * width + c] == b'7')
+            .count();
+        let jays = points
+            .iter()
+            .filter(|(r, c)| *r == row && *c > col)
+            .filter(|(r, c)| input.as_bytes()[r * width + c] == b'J')
+            .count();
+        let ells = points
+            .iter()
+            .filter(|(r, c)| *r == row && *c > col)
+            .filter(|(r, c)| input.as_bytes()[r * width + c] == b'L')
+            .count();
+
+        let count = 100 + sticks + effs - sevens;
+
+        count % 2 == 1
+    };
+
+    input
+        .bytes()
+        .enumerate()
+        .filter(|(i, _c)| {
+            let loc = (i / width, i % width);
+            !points.contains(&loc) && count_intersections(loc.0, loc.1)
+        })
+        // .inspect(|(i, c)| {
+        //     let loc = (i / width, i % width);
+        //     println!("{loc:?} , {}", *c as char)
+        // })
+        .count()
 }
 
 #[cfg(test)]
