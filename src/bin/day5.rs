@@ -133,7 +133,7 @@ mod tests {
     use super::*;
     use test_case::test_case;
 
-    const EXAMPLE: &str = include_str!("../../input/day5example.txt");
+    const EXAMPLE: &str = include_str!("../../tests/day5.txt");
 
     #[test_case(EXAMPLE => 35)]
     fn test_part_1(i: &str) -> i64 {
