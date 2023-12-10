@@ -81,68 +81,43 @@ fn solve_1(input: &str) -> usize {
             unreachable!()
         };
 
+        counter += 1;
         match (dir, current_pipe) {
             // go right
             (Direction::Up, b'F') | (Direction::Down, b'L') | (Direction::Right, b'-') => {
                 let (row, col) = (current_loc.0, current_loc.1 + 1);
                 let new_pipe = input.as_bytes()[row * width + col];
-                if new_pipe == b'7' || new_pipe == b'J' || new_pipe == b'-' {
-                    current_loc = (row, col);
-                    current_pipe = new_pipe;
-                    came_by = Some(Direction::Right);
-                    counter += 1;
-                }
-                if new_pipe == b'S' {
-                    counter += 1;
-                    break;
-                }
+                current_loc = (row, col);
+                current_pipe = new_pipe;
+                came_by = Some(Direction::Right);
             }
             // go up
             (Direction::Right, b'J') | (Direction::Left, b'L') | (Direction::Up, b'|') => {
                 let (row, col) = (current_loc.0 - 1, current_loc.1);
                 let new_pipe = input.as_bytes()[row * width + col];
-                if new_pipe == b'7' || new_pipe == b'F' || new_pipe == b'|' {
-                    current_loc = (row, col);
-                    current_pipe = new_pipe;
-                    came_by = Some(Direction::Up);
-                    counter += 1;
-                }
-                if new_pipe == b'S' {
-                    counter += 1;
-                    break;
-                }
+                current_loc = (row, col);
+                current_pipe = new_pipe;
+                came_by = Some(Direction::Up);
             }
             // go down
             (Direction::Right, b'7') | (Direction::Left, b'F') | (Direction::Down, b'|') => {
                 let (row, col) = (current_loc.0 + 1, current_loc.1); // OVERFLOW
                 let new_pipe = input.as_bytes()[row * width + col];
-                if new_pipe == b'L' || new_pipe == b'J' || new_pipe == b'|' {
-                    current_loc = (row, col);
-                    current_pipe = new_pipe;
-                    came_by = Some(Direction::Down);
-                    counter += 1;
-                }
-                if new_pipe == b'S' {
-                    counter += 1;
-                    break;
-                }
+                current_loc = (row, col);
+                current_pipe = new_pipe;
+                came_by = Some(Direction::Down);
             }
             // go left
             (Direction::Down, b'J') | (Direction::Up, b'7') | (Direction::Left, b'-') => {
                 let (row, col) = (current_loc.0, current_loc.1 - 1); // OVERFLOW
                 let new_pipe = input.as_bytes()[row * width + col];
-                if new_pipe == b'F' || new_pipe == b'L' || new_pipe == b'-' {
-                    current_loc = (row, col);
-                    current_pipe = new_pipe;
-                    came_by = Some(Direction::Left);
-                    counter += 1;
-                }
-                if new_pipe == b'S' {
-                    counter += 1;
-                    break;
-                }
+                current_loc = (row, col);
+                current_pipe = new_pipe;
+                came_by = Some(Direction::Left);
             }
-
+            (_, b'S') => {
+                break;
+            }
             _ => eprintln!("----------> DEAD ZONE"),
         }
     }
