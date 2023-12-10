@@ -141,7 +141,7 @@ fn parse_line_2_recursion(input: &str) -> isize {
         let first = seq[0];
 
         for i in (1..len).rev() {
-            seq[i] = seq[i] - seq[i - 1];
+            seq[i] -= -seq[i - 1];
         }
 
         first - prev_num(&mut seq[1..len])
@@ -176,7 +176,7 @@ fn parse_line_2_recursion_2(input: &str, nums: &mut Vec<isize>) -> isize {
         let first = seq[0];
 
         for i in (1..len).rev() {
-            seq[i] = seq[i] - seq[i - 1];
+            seq[i] -= seq[i - 1];
         }
 
         first - prev_num(&mut seq[1..len])
