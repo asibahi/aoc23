@@ -6,6 +6,8 @@ fn main() {
 
     let res = solve_2(INPUT);
     println!("Part 2:\t{res}");
+
+    assert_eq!(res, solve_2_try_2(INPUT));
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -280,9 +282,39 @@ fn solve_2_try_2(input: &str) -> usize {
     };
     let input = input.as_bytes();
 
-    #[allow(unused_assignments)]
-    let mut true_nature_of_s = None;
-    let mut starting_direction = None;
+    let true_s = {
+        // check right
+        let right = input[current_loc.0 * width + (current_loc.1 + 1)];
+        let conntected_to_right = right == b'-' || right == b'7' || right == b'J';
+
+        // check down
+        let down = input[(current_loc.0 + 1) * width + current_loc.1];
+        let connected_to_down = down == b'|' || down == b'J' || down == b'L';
+
+        // check left
+        let left = input[current_loc.0 * width + (current_loc.1 - 1)];
+        let connected_to_left = left == b'F' || left == b'L' || left == b'-';
+
+        // check up
+        let connected_to_up = current_loc.0 > 0 && {
+            let up = input[(current_loc.0 - 1) * width + current_loc.1];
+            up == b'|' || up == b'7' || up == b'F'
+        };
+
+        if conntected_to_right && connected_to_down {
+            b'F'
+        } else if connected_to_left && conntected_to_right {
+            b'-'
+        } else if connected_to_left && connected_to_down {
+            b'7'
+        } else if connected_to_left && connected_to_up {
+            b'J'
+        } else if conntected_to_right && connected_to_up {
+            b'L'
+        } else {
+            b'|'
+        }
+    };
 
     let mut points = vec![];
 
@@ -323,7 +355,6 @@ fn solve_2_try_2(input: &str) -> usize {
                 }
                 unreachable!()
             };
-            starting_direction = came_by;
             current_loc = (row, col);
             current_pipe = new_pipe;
             points.push((row, col));
@@ -352,29 +383,7 @@ fn solve_2_try_2(input: &str) -> usize {
                 came_by = Some(Dir::Left);
                 (current_loc.0, current_loc.1 - 1)
             }
-            (_, b'S') => {
-                let pipe = match (starting_direction.unwrap(), came_by.unwrap()) {
-                    (Dir::Down, Dir::Left) => b'F',
-                    (Dir::Down, Dir::Right) => b'7',
-                    (Dir::Up, Dir::Right) => b'J',
-                    (Dir::Up, Dir::Left) => b'L',
-                    (Dir::Up, Dir::Up) | (Dir::Down, Dir::Down) => b'|',
-                    (Dir::Left, Dir::Left) | (Dir::Right, Dir::Right) => b'-',
-                    (Dir::Right, Dir::Up) => b'F',
-
-                    // in testing
-                    (Dir::Left, Dir::Down) => b'J',
-                    (Dir::Right, Dir::Down) => b'L',
-                    (Dir::Left, Dir::Up) => b'7',
-
-                    // rest to be debugged. maybe unreachable
-                    (Dir::Up, Dir::Down) | (Dir::Down, Dir::Up) => b'|',
-                    (Dir::Left, Dir::Right) | (Dir::Right, Dir::Left) => b'-',
-                };
-
-                true_nature_of_s = Some(pipe);
-                break;
-            }
+            (_, b'S') => break,
             _ => unreachable!(),
         };
         current_loc = (row, col);
@@ -386,12 +395,8 @@ fn solve_2_try_2(input: &str) -> usize {
     let mut currently_inside = false;
     let mut last_corner = None;
 
-    for (i, c) in input.into_iter().enumerate() {
-        let c = if *c == b'S' {
-            true_nature_of_s.unwrap()
-        } else {
-            *c
-        };
+    for (i, c) in input.iter().enumerate() {
+        let c = if *c == b'S' { true_s } else { *c };
         let loc = (i / width, i % width);
         if points.contains(&loc) {
             match c {
