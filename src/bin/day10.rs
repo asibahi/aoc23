@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 const INPUT: &str = include_str!("../../input/day10.txt");
 
 fn main() {
@@ -316,7 +318,7 @@ fn solve_2_try_2(input: &str) -> usize {
         }
     };
 
-    let mut points = vec![];
+    let mut points = HashSet::new();
 
     let mut current_pipe = input[current_loc.0 * width + current_loc.1];
     let mut came_by = None;
@@ -357,7 +359,7 @@ fn solve_2_try_2(input: &str) -> usize {
             };
             current_loc = (row, col);
             current_pipe = new_pipe;
-            points.push((row, col));
+            points.insert((row, col));
 
             continue;
         };
@@ -388,7 +390,7 @@ fn solve_2_try_2(input: &str) -> usize {
         };
         current_loc = (row, col);
         current_pipe = input[row * width + col];
-        points.push((row, col));
+        points.insert((row, col));
     }
 
     let mut inner_counter = 0;
